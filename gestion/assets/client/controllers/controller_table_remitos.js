@@ -2813,11 +2813,11 @@ export async function abrirFormRemitoUpdate(remitoId) {
                 if (data.remito.empresa_destino === 'GO LOGISTISCA') {
 
                     dominioFieldUpdate.classList.remove('is-hidden');
+                    divisionFieldUpdate.classList.remove('is-hidden');
 
                 }
 
             }
-
 
 
             document.getElementById('fechaUpdate').value = data.remito.fecha;
@@ -2853,6 +2853,8 @@ export async function abrirFormRemitoUpdate(remitoId) {
             document.getElementById('incluirArchivosupdate').value = data.remito.incluirArchivos == 1;
 
             document.getElementById('fechaRemitoUpdate').value = data.remito.fechaRemito;
+
+            document.getElementById('divisionUpdate').value = data.remito.division;
 
 
 
