@@ -814,7 +814,69 @@ function fetchEmpresasDestino() {
 
 }
 
+function fetchUsuarioYEmpresasGrupo() {
+    fetch('../../server/backend/modules/fetch-user.php')
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) return;
 
+            const tipoUsuario = data.tipo_usuario.toUpperCase();
+            const selectEmpresa = document.getElementById('empresaGrupo');
+
+            // Lista de empresas posibles (en mayúsculas)
+            const empresas = ["TPOIL", "TRANSPETRONE", "ABASTO", "NEMER"];
+
+            // Limpiar las opciones actuales
+            selectEmpresa.innerHTML = "";
+
+            if (tipoUsuario === "ADMINISTRADOR") {
+                // Agregar todas las empresas en mayúsculas
+                empresas.forEach(e => {
+                    const option = new Option(e.toUpperCase(), e.toUpperCase());
+                    if (e.toUpperCase() === "TPOIL") {
+                        option.selected = true; // Selecciona TPOIL por defecto
+                    }
+                    selectEmpresa.appendChild(option);
+                });
+            } else {
+                // Solo su empresa en mayúsculas
+                selectEmpresa.appendChild(new Option(tipoUsuario, tipoUsuario, true, true));
+            }
+        })
+        .catch(err => console.error(err));
+}
+
+function fetchUsuarioYEmpresasUpdate() {
+    fetch('../../server/backend/modules/fetch-user.php')
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) return;
+
+            const tipoUsuario = data.tipo_usuario.toUpperCase();
+            const selectEmpresa = document.getElementById('empresaUpdate');
+
+            // Lista de empresas posibles (en mayúsculas)
+            const empresas = ["TPOIL", "TRANSPETRONE", "ABASTO", "NEMER"];
+
+            // Limpiar las opciones actuales
+            selectEmpresa.innerHTML = "";
+
+            if (tipoUsuario === "ADMINISTRADOR") {
+                // Agregar todas las empresas en mayúsculas
+                empresas.forEach(e => {
+                    const option = new Option(e.toUpperCase(), e.toUpperCase());
+                    if (e.toUpperCase() === "TPOIL") {
+                        option.selected = true; // Selecciona TPOIL por defecto
+                    }
+                    selectEmpresa.appendChild(option);
+                });
+            } else {
+                // Solo su empresa en mayúsculas
+                selectEmpresa.appendChild(new Option(tipoUsuario, tipoUsuario, true, true));
+            }
+        })
+        .catch(err => console.error(err));
+}
 
 function fetchEmpresasDestinoUpdate() {
 
@@ -1564,7 +1626,7 @@ export function renderFormRemitoGrupos() {
         });
 
         fetchEmpresasDestinoGrupo();
-
+        fetchUsuarioYEmpresasGrupo();
         fetchEmails();
 
     }
@@ -2307,7 +2369,7 @@ export function renderFormRemitoUpdate() {
         // Cargar empresas destino dinámicamente
 
         fetchEmpresasDestinoUpdate();
-
+        fetchUsuarioYEmpresasUpdate();
         fetchEmails();
 
     } else {
@@ -2317,6 +2379,7 @@ export function renderFormRemitoUpdate() {
     }
 
 }
+
 
 
 
