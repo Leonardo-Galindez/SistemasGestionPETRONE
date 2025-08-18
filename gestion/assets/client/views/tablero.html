@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Tablero Supervisores</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .supervisor-row {
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s ease;
+        }
+
+        .supervisor-row:hover {
+            transform: scale(1.01);
+        }
+
+        .chart-box {
+            background-color: #f9fafb;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+            padding: 0.5rem;
+        }
+
+        .chart-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chart-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80px;
+        }
+
+        .chart-box canvas {
+            width: 65px !important;
+            height: 65px !important;
+        }
+
+        #graficoLineaPorcentaje {
+            width: 100% !important;
+        }
+
+        #graficoBarras {
+            width: 90% !important;
+            height: 80% !important;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-900 p-6">
+
+    <header
+        class="flex items-center justify-between bg-[#00A2E9] p-4 shadow-sm border-b border-gray-200 mb-6 text-white rounded">
+
+
+        <div class="flex items-center gap-4">
+            <img src="../../assets/img/logo.jpeg" alt="Logo"
+                class="h-30 w-40 rounded-2xl object-cover shadow-md border border-gray-300" />
+            <h2 class="text-3xl font-bold" style="color: #ffffff;">DASHBOARD GERENCIAL</h2>
+        </div>
+    </header>
+
+    <div class="flex justify-start mb-6">
+        <button onclick="abrirModal()" class="text-white px-6 py-2 rounded shadow hover:brightness-110 transition"
+            style="background-color: #00A2E9;">
+            Filtrar
+        </button>
+    </div>
+
+    <div class="flex gap-4">
+        <!-- Estadísticas -->
+        <div class="bg-white rounded shadow p-4 w-full">
+            <h3 class="text-lg font-semibold mb-4 text-center">Estadísticas</h3>
+            <div class="grid grid-cols-2 gap-4 text-center">
+                <div class="bg-gray-100 rounded p-2">
+                    <div class="text-xs text-gray-500">Supervisores</div>
+                    <div id="totalSupervisores" class="text-lg font-bold">0</div>
+                </div>
+                <div class="bg-gray-100 rounded p-2">
+                    <div class="text-xs text-gray-500">Equipos</div>
+                    <div id="totalEquipos" class="text-lg font-bold">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4 flex flex-col items-center justify-center w-full">
+            <h3 class="text-base font-semibold text-center mb-2 text-gray-800">Trabajo Total</h3>
+            <div class="relative w-full flex justify-center">
+                <canvas id="gaugeTrabajo" width="200" height="90"></canvas>
+                <div id="labelTrabajoGauge" class="absolute bottom-2 text-center text-gray-800 text-sm font-semibold">
+                    <div class="text-xs">trabajoPorcentaje</div>
+                    <div class="text-xl font-bold" id="gaugePorcentajeNum">0%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="flex gap-6 mt-8">
+        <!-- Porcentaje General: 1/2 -->
+        <div class="bg-white rounded-xl shadow-md p-4 mb-6 basis-1/2">
+            <h3 class="text-lg font-semibold mb-4 text-center">Porcentaje General en el Tiempo</h3>
+            <div class="w-full h-[360px]">
+                <canvas id="graficoLineaPorcentaje" class="w-full h-full"></canvas>
+            </div>
+        </div>
+
+        <!-- Comparación General: 1/2 -->
+        <div class="bg-white rounded-xl shadow-md p-4 mb-6 basis-1/2">
+            <h3 class="text-lg font-semibold mb-4 text-center">Comparación General</h3>
+            <div class="w-full h-[360px]">
+                <canvas id="graficoBarras" class="w-full h-full"></canvas>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="flex gap-4">
+        <!-- Columna izquierda: Gráficos por equipo -->
+        <div id="contenido" class="space-y-8 flex-1"></div>
+
+    </div>
+
+
+    <!-- Modal -->
+    <div id="filtroModal" class="fixed inset-0 bg-black bg-opacity-40 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="bg-white p-6 rounded shadow-lg w-full max-w-md">
+                <h3 class="text-xl font-semibold mb-4">Filtrar Resultados</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="supervisorFiltro" class="block mb-1 font-medium">Supervisor:</label>
+                        <select id="supervisorFiltro" class="w-full border rounded px-2 py-1">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="fechaInicioModal" class="block mb-1 font-medium">Desde:</label>
+                        <input type="date" id="fechaInicioModal" class="w-full border rounded px-2 py-1">
+                    </div>
+                    <div>
+                        <label for="fechaFinModal" class="block mb-1 font-medium">Hasta:</label>
+                        <input type="date" id="fechaFinModal" class="w-full border rounded px-2 py-1">
+                    </div>
+                    <div class="flex justify-end gap-2 pt-4">
+                        <button onclick="aplicarFiltro()"
+                            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Aplicar</button>
+                        <button onclick="limpiarModal()"
+                            class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Limpiar</button>
+                        <button onclick="cerrarModal()"
+                            class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let supervisoresGlobales = new Set();
+        let graficoBarras = null;
+
+        function abrirModal() {
+            document.getElementById("filtroModal").classList.remove("hidden");
+        }
+
+        function cerrarModal() {
+            document.getElementById("filtroModal").classList.add("hidden");
+        }
+
+        function limpiarModal() {
+            document.getElementById("fechaInicioModal").value = "";
+            document.getElementById("fechaFinModal").value = "";
+            document.getElementById("supervisorFiltro").value = "";
+        }
+
+        function aplicarFiltro() {
+            const fechaInicio = document.getElementById("fechaInicioModal").value;
+            const fechaFin = document.getElementById("fechaFinModal").value;
+            const supervisor = document.getElementById("supervisorFiltro").value;
+            cargarDatos(fechaInicio, fechaFin, supervisor);
+            cerrarModal();
+        }
+
+        function cargarDatos(fechaInicio = '', fechaFin = '', supervisorFiltro = '') {
+            let url = '../../server/backend/modules/fetch_parte.php';
+            const params = new URLSearchParams();
+
+            if (fechaInicio && fechaFin) {
+                params.append('fechaInicio', fechaInicio);
+                params.append('fechaFin', fechaFin);
+            }
+
+            fetch(url + (params.toString() ? '?' + params.toString() : ''))
+                .then(response => response.json())
+                .then(json => {
+                    if (!json.success) throw new Error(json.message);
+
+                    const data = json.data;
+                    const agrupado = {};
+                    const resumenTrabajo = {};
+                    const equiposUnicos = new Set();
+
+                    const contenedor = document.getElementById("contenido");
+                    contenedor.innerHTML = '';
+                    supervisoresGlobales.clear();
+                    let chartIndex = 0;
+
+                    data.forEach(fila => {
+                        const supervisorRaw = fila.supervisor.trim();
+                        const supervisorNormalizado = supervisorRaw.toUpperCase();
+                        supervisoresGlobales.add(supervisorRaw); // Mostrar como se ve originalmente
+
+                        if (supervisorFiltro && supervisorRaw !== supervisorFiltro) return;
+
+                        if (!agrupado[supervisorRaw]) agrupado[supervisorRaw] = {};
+                        if (!resumenTrabajo[supervisorRaw]) resumenTrabajo[supervisorRaw] = { si: 0, no: 0 };
+
+                        const equiposPorSupervisor = {
+                            "MAXI PURRALLAN": ["CHM02", "CV1", "CV2", "CV3", "CV4", "CHM01", "CHM57_01", "CE01", "CE02", "CH54"],
+                            "CERDA LUCIANO": ["CP3", "CC2", "CP1", "CA1", "CV01", "MT1", "CM1", "CM2", "CM03"],
+                            "GUILLERMO VIVANCO": ["G01", "G02", "G03", "G04", "CR1", "ZM01", "CR03", "CR4", "G07", "G08", "AE03"],
+                            "JUAN KAVKA": ["LP", "LC_", "LM", "LB", "LC", "LS", "TB01"]
+                        };
+
+                        const equiposPermitidos = equiposPorSupervisor[supervisorNormalizado] || [];
+
+                        for (let key in fila) {
+                            if (!["id", "fecha", "supervisor", "observaciones"].includes(key)) {
+                                const equipoKey = key.trim().toUpperCase();
+                                const valor = fila[key]?.trim().toUpperCase();
+
+                                if (!equiposPermitidos.includes(equipoKey)) continue;
+                                if (valor === "SI" || valor === "NO") {
+                                    if (!agrupado[supervisorRaw][equipoKey]) agrupado[supervisorRaw][equipoKey] = { SI: 0, NO: 0 };
+                                    agrupado[supervisorRaw][equipoKey][valor]++;
+                                    if (valor === "SI") resumenTrabajo[supervisorRaw].si++;
+                                    if (valor === "NO") resumenTrabajo[supervisorRaw].no++;
+                                    equiposUnicos.add(equipoKey);
+                                }
+                            }
+                        }
+                    });
+
+
+                    actualizarSelectSupervisores();
+
+                    for (let supervisor in agrupado) {
+                        const filaSup = document.createElement("div");
+                        filaSup.className = "supervisor-row";
+
+                        const supervisorBox = document.createElement("div");
+                        supervisorBox.className = "text-left mb-2 w-full";
+                        supervisorBox.innerHTML = `
+                             <div onclick="window.open('tablero-supervisor.html?nombre=${encodeURIComponent(supervisor)}', '_blank');"
+     class="inline-block bg-blue-100 text-blue-800 px-4 py-2 rounded-xl font-semibold text-lg shadow-sm cursor-pointer hover:bg-blue-200 transition">
+  ${supervisor}
+</div>
+
+
+                            `;
+
+                        const chartContainer = document.createElement("div");
+                        chartContainer.className = "chart-grid";
+
+                        for (let equipo in agrupado[supervisor]) {
+                            const si = agrupado[supervisor][equipo].SI || 0;
+                            const no = agrupado[supervisor][equipo].NO || 0;
+                            const total = si + no;
+                            const porcentaje = total > 0 ? Math.round((si / total) * 100) : 0;
+                            const chartId = `chart${chartIndex++}`;
+
+                            const chartBox = document.createElement("div");
+                            chartBox.className = "chart-box";
+                            chartBox.innerHTML = `
+                                <div class="text-xs text-gray-700 mb-1">${equipo}</div>
+                                <div class="relative">
+                                    <canvas id="${chartId}"></canvas>
+                                    <div class="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-800">
+                                        ${porcentaje}%
+                                    </div>
+                                </div>`;
+
+                            chartContainer.appendChild(chartBox);
+
+                            setTimeout(() => {
+                                new Chart(document.getElementById(chartId), {
+                                    type: 'doughnut',
+                                    data: {
+                                        labels: ['SI', 'NO'],
+                                        datasets: [{
+                                            data: [si, no],
+                                            backgroundColor: ['#22c55e', '#ef4444'],
+                                            borderWidth: 1
+                                        }]
+                                    },
+                                    options: {
+                                        cutout: '70%',
+                                        plugins: {
+                                            legend: { display: false },
+                                            tooltip: {
+                                                callbacks: {
+                                                    label: (context) => `${context.label}: ${context.raw}`
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            }, 0);
+                        }
+
+                        filaSup.appendChild(supervisorBox);
+                        filaSup.appendChild(chartContainer);
+                        contenedor.appendChild(filaSup);
+                    }
+
+                    cargarGraficoBarrasDinamico(resumenTrabajo, equiposUnicos);
+                    renderGraficoLineaPorcentaje(data);
+
+                })
+                .catch(error => {
+                    document.getElementById("contenido").innerHTML = `<p class="text-red-600 font-bold text-center">Error: ${error.message}</p>`;
+                    console.error("Error:", error);
+                });
+        }
+        function actualizarSelectSupervisores() {
+            const select = document.getElementById("supervisorFiltro");
+            const seleccionActual = select.value;
+            select.innerHTML = '<option value="">Todos</option>';
+            [...supervisoresGlobales].sort().forEach(nombre => {
+                const option = document.createElement("option");
+                option.value = nombre;
+                option.textContent = nombre;
+                if (nombre === seleccionActual) option.selected = true;
+                select.appendChild(option);
+            });
+        }
+
+
+        function renderGaugeTrabajo(porcentaje) {
+            const ctx = document.getElementById('gaugeTrabajo').getContext('2d');
+            if (window.gaugeChart) window.gaugeChart.destroy();
+
+            window.gaugeChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Trabajo (%)', 'Restante'],
+                    datasets: [{
+                        data: [porcentaje, 100 - porcentaje],
+                        backgroundColor: ['#06b6d4', '#e5e7eb'], // cyan y gris claro
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    rotation: -90,
+                    circumference: 180,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    }
+                }
+            });
+
+            document.getElementById('gaugePorcentajeNum').textContent = porcentaje.toFixed(2) + '%';
+        }
+
+
+
+        function cargarGraficoBarrasDinamico(resumenTrabajo, equiposUnicos) {
+            const labels = [];
+            const trabajoPorcentaje = [];
+            const noTrabajoPorcentaje = [];
+
+            for (const supervisor in resumenTrabajo) {
+                const { si, no } = resumenTrabajo[supervisor];
+                const total = si + no;
+                const porcentajeSi = total > 0 ? Math.round((si / total) * 100) : 0;
+                const porcentajeNo = total > 0 ? Math.round((no / total) * 100) : 0;
+
+                labels.push(supervisor);
+                trabajoPorcentaje.push(porcentajeSi);
+                noTrabajoPorcentaje.push(porcentajeNo);
+            }
+
+            if (graficoBarras) graficoBarras.destroy();
+
+            const ctx = document.getElementById('graficoBarras').getContext('2d');
+            graficoBarras = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Trabajo (%)',
+                            data: trabajoPorcentaje,
+                            backgroundColor: '#22c55e'
+                        },
+                        {
+                            label: 'No Trabajo (%)',
+                            data: noTrabajoPorcentaje,
+                            backgroundColor: '#ef4444'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: value => value + '%'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const totalSupervisores = labels.length;
+            const promTrabajo = trabajoPorcentaje.length > 0 ? Math.round(trabajoPorcentaje.reduce((a, b) => a + b, 0) / trabajoPorcentaje.length) : 0;
+            const promNoTrabajo = noTrabajoPorcentaje.length > 0 ? Math.round(noTrabajoPorcentaje.reduce((a, b) => a + b, 0) / noTrabajoPorcentaje.length) : 0;
+            // Calcular total general de trabajo
+            let totalSi = 0;
+            let total = 0;
+            for (const supervisor in resumenTrabajo) {
+                totalSi += resumenTrabajo[supervisor].si;
+                total += resumenTrabajo[supervisor].si + resumenTrabajo[supervisor].no;
+            }
+            const porcentajeGlobalTrabajo = total > 0 ? (totalSi / total) * 100 : 0;
+            renderGaugeTrabajo(porcentajeGlobalTrabajo);
+
+            document.getElementById('totalSupervisores').textContent = totalSupervisores;
+            document.getElementById('totalEquipos').textContent = equiposUnicos.size;
+
+        }
+        let graficoLinea = null;
+
+        function renderGraficoLineaPorcentaje(datosOriginales) {
+            // Extraer fechas y porcentajes
+            const fechas = [];
+            const porcentajes = [];
+
+            datosOriginales.forEach(fila => {
+                let totalSi = 0;
+                let total = 0;
+                for (let key in fila) {
+                    if (!["id", "fecha", "supervisor", "observaciones"].includes(key)) {
+                        const valor = fila[key]?.trim();
+                        if (valor === "SI" || valor === "NO") {
+                            total++;
+                            if (valor === "SI") totalSi++;
+                        }
+                    }
+                }
+                const porcentaje = total > 0 ? Math.round((totalSi / total) * 100) : 0;
+                fechas.push(fila.fecha);
+                porcentajes.push(porcentaje);
+            });
+
+            // Destruir gráfico anterior si existe
+            if (graficoLinea) graficoLinea.destroy();
+
+            const ctx = document.getElementById('graficoLineaPorcentaje').getContext('2d');
+            graficoLinea = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: fechas,
+                    datasets: [{
+                        label: 'Porcentaje',
+                        data: porcentajes,
+                        borderColor: '#00A2E9',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 100,
+                            ticks: {
+                                callback: value => value + '%'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        window.onload = () => {
+            cargarDatos();
+        };
+    </script>
+</body>
+
+</html>

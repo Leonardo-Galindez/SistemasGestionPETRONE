@@ -1,0 +1,9 @@
+@import url('palette.css');
+
+.login{
+    background-color: var(--color-primario) !important;
+}
+
+.login:active {
+    background-color: var(--color-primario-hover) !important;
+}

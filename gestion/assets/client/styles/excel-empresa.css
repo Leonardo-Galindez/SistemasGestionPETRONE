@@ -1,0 +1,116 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  /* Diseño vertical */
+  height: 100vh;
+  /* Altura completa de la pantalla */
+}
+
+.toolbar {
+  height: 22%;
+  /* Ocupa el 20% de la altura */
+  background-color: #f4f4f4;
+  border-bottom: 1px solid #ccc;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  /* El contenido dentro de la toolbar sigue apilado */
+}
+
+.top-menu {
+  display: flex;
+  /* Pone los elementos en fila */
+  gap: 15px;
+  /* Espacio entre enlaces */
+  margin-bottom: 20px;
+}
+
+.top-menu a {
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.top-menu a i {
+  margin-right: 8px;
+}
+
+.section.fuente {
+  margin-bottom: 20px;
+}
+
+.section.fuente .row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.section.fuente select,
+.section.fuente input[type="number"] {
+  margin-right: 10px;
+  padding: 5px;
+  font-size: 14px;
+}
+
+.color-picker {
+  margin-right: 10px;
+}
+
+.color-picker input[type="color"] {
+  border: none;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
+.formulas input[type="text"] {
+  width: 100%;
+  padding: 5px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#handsontable {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  /* Activa barras de desplazamiento si es necesario */
+  min-width: 100%;
+  /* Ancho mínimo del contenedor */
+  min-height: 100%;
+  /* Altura mínima del contenedor */
+}
+
+.excel {
+  height: 78%;
+  /* Altura fija para contener Handsontable */
+  width: 100%;
+  background-color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+  /* Activa barras de desplazamiento si el contenido se desborda */
+}
+
+
+#borders-toolbar {
+  margin-bottom: 10px;
+}
+
+#borders-select {
+  font-size: 16px;
+  padding: 5px;
+  width: 250px;
+  font-family: 'Font Awesome 5 Free', Arial, sans-serif;
+}

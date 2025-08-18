@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Detalle del Supervisor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gray-100 p-4">
+  <header
+    class="flex items-center justify-between bg-[#00A2E9] p-4 shadow-sm border-b border-gray-200 mb-6 text-white rounded">
+
+
+    <div class="flex items-center gap-4">
+      <img src="../../assets/img/logo.jpeg" alt="Logo"
+        class="h-30 w-40 rounded-2xl object-cover shadow-md border border-gray-300" />
+      <h2 id="tituloSupervisor" class="text-3xl font-bold" style="color: #ffffff;"></h2>
+    </div>
+  </header>
+
+  <div class="flex justify-start mb-6">
+    <button onclick="abrirModal()" class="text-white px-6 py-2 rounded shadow hover:brightness-110 transition"
+      style="background-color: #00A2E9;">
+      Filtrar
+    </button>
+  </div>
+
+  <div id="dashboard" class="space-y-4 max-w-6xl mx-auto"></div>
+  <!-- Modal -->
+  <div id="filtroModal" class="fixed inset-0 bg-black bg-opacity-40 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen">
+      <div class="bg-white p-6 rounded shadow-lg w-full max-w-md">
+        <h3 class="text-xl font-semibold mb-4">Filtrar Resultados</h3>
+        <div class="space-y-4">
+          <div>
+            <label for="fechaInicioModal" class="block mb-1 font-medium">Desde:</label>
+            <input type="date" id="fechaInicioModal" class="w-full border rounded px-2 py-1">
+          </div>
+          <div>
+            <label for="fechaFinModal" class="block mb-1 font-medium">Hasta:</label>
+            <input type="date" id="fechaFinModal" class="w-full border rounded px-2 py-1">
+          </div>
+          <div class="flex justify-end gap-2 pt-4">
+            <button onclick="aplicarFiltro()"
+              class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Aplicar</button>
+            <button onclick="limpiarModal()"
+              class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Limpiar</button>
+            <button onclick="cerrarModal()"
+              class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const nombreSupervisor = new URLSearchParams(window.location.search).get("nombre");
+    document.getElementById("tituloSupervisor").textContent = `DASHBOARD ${nombreSupervisor}`;
+
+    function abrirModal() {
+      document.getElementById("filtroModal").classList.remove("hidden");
+    }
+
+    function cerrarModal() {
+      document.getElementById("filtroModal").classList.add("hidden");
+    }
+
+    function limpiarModal() {
+      document.getElementById("fechaInicioModal").value = "";
+      document.getElementById("fechaFinModal").value = "";
+      cargarDatos(); // Reinicia sin filtro
+      cerrarModal();
+    }
+
+    function aplicarFiltro() {
+      const fechaInicio = document.getElementById("fechaInicioModal").value;
+      const fechaFin = document.getElementById("fechaFinModal").value;
+      cargarDatos(fechaInicio, fechaFin);
+      cerrarModal();
+    }
+
+    function cargarDatos(fechaInicio = '', fechaFin = '') {
+      const dashboard = document.getElementById("dashboard");
+      dashboard.innerHTML = ''; // Limpiar anterior
+
+      let url = `../../server/backend/modules/fetch_parte.php?supervisor=${encodeURIComponent(nombreSupervisor)}`;
+      if (fechaInicio && fechaFin) {
+        url += `&fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}`;
+      }
+
+      fetch(url)
+        .then(res => res.json())
+        .then(json => {
+          if (!json.success) throw new Error(json.message);
+          const datos = json.data;
+          const equipos = {};
+
+          datos.forEach(fila => {
+            const fecha = fila.fecha;
+            for (let campo in fila) {
+              if (["id", "fecha", "supervisor", "observaciones"].includes(campo)) continue;
+              const equipo = campo.trim().toUpperCase();
+              const estado = fila[campo]?.trim().toUpperCase();
+
+              if (!["SI", "NO"].includes(estado)) continue;
+
+              if (!equipos[equipo]) {
+                equipos[equipo] = { fechas: [], valores: [], SI: 0, NO: 0 };
+              }
+
+              equipos[equipo].fechas.push(fecha);
+              equipos[equipo].valores.push(estado === "SI" ? 100 : 0);
+              equipos[equipo][estado]++;
+            }
+          });
+
+          Object.entries(equipos).forEach(([equipo, info]) => {
+            const lineaId = `linea_${equipo}`;
+            const donutId = `donut_${equipo}`;
+
+            const fila = document.createElement('div');
+            fila.className = 'flex gap-3 bg-white p-3 rounded-lg shadow-sm items-center';
+
+            fila.innerHTML = `
+            <div class="w-24 text-center">
+              <h2 class="text-sm font-medium mb-1">${equipo}</h2>
+              <canvas id="${donutId}" width="70" height="70"></canvas>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="h-[120px] w-full">
+                <canvas id="${lineaId}" class="w-full h-full"></canvas>
+              </div>
+            </div>
+          `;
+            dashboard.appendChild(fila);
+
+            // Donut
+            const ctxDonut = document.getElementById(donutId).getContext('2d');
+            new Chart(ctxDonut, {
+              type: 'doughnut',
+              data: {
+                labels: ['SI', 'NO'],
+                datasets: [{
+                  data: [info.SI, info.NO],
+                  backgroundColor: ['#22c55e', '#ef4444']
+                }]
+              },
+              options: {
+                responsive: false,
+                plugins: {
+                  legend: { display: false }
+                },
+                cutout: '65%'
+              }
+            });
+
+            // Línea
+            const fechasOrdenadas = info.fechas.map((f, i) => ({ fecha: f, valor: info.valores[i] }))
+              .sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+
+            const ctxLinea = document.getElementById(lineaId).getContext('2d');
+            new Chart(ctxLinea, {
+              type: 'line',
+              data: {
+                labels: fechasOrdenadas.map(d => d.fecha),
+                datasets: [{
+                  label: `%${equipo}`,
+                  data: fechasOrdenadas.map(d => d.valor),
+                  borderColor: '#3b82f6',
+                  borderWidth: 1.5,
+                  fill: false,
+                  pointRadius: 1.5
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  y: {
+                    min: 0,
+                    max: 100,
+                    ticks: { callback: value => value + '%' }
+                  }
+                },
+                plugins: { legend: { display: false } }
+              }
+            });
+          });
+
+          if (Object.keys(equipos).length === 0) {
+            dashboard.innerHTML = `<p class="text-center text-gray-600 font-medium">No se encontraron datos para este supervisor.</p>`;
+          }
+
+        })
+        .catch(error => {
+          document.getElementById("dashboard").innerHTML = `<p class="text-red-600 text-center font-bold">Error: ${error.message}</p>`;
+          console.error("Error al cargar datos:", error);
+        });
+    }
+
+    // Carga inicial
+    window.onload = () => {
+      cargarDatos();
+    };
+  </script>
+
+</body>
+
+</html>
