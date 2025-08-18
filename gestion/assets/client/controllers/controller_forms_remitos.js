@@ -594,6 +594,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const dominioGrupo = document.getElementById('dominioGrupo').value;
 
+            const divisionGrupo = document.getElementById('divisionGrupo').value;
+
             const valorTotalGrupo = document.getElementById('valor_totalGrupo').value;
 
             const descripcionGrupo = document.getElementById('descripcionGrupo').value;
@@ -645,6 +647,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 fechaGrupo,
 
                 dominioGrupo,
+
+                divisionGrupo,
 
                 valorTotalGrupo,
 
@@ -1101,6 +1105,8 @@ async function enviarRemitoGrupo(remito) {
     formData.append('empresa', remito.empresaGrupo);
 
     formData.append('empresa_destino', remito.empresa_destinoGrupo);
+
+    formData.append('division', remito.divisionGrupo);
 
     formData.append('nueva_empresa_destino', remito.nuevaEmpresaDestinoGrupo);
 

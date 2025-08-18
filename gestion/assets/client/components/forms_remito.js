@@ -1114,6 +1114,32 @@ export function renderFormRemitoGrupos() {
 
                                     </div>
 
+                                    <div class="column">
+
+                                        <div class="field is-hidden" id="divisionFieldGrupo">
+
+                                            <label class="label" for="division">División</label>
+
+                                            <div class="control">
+
+                                                <div class="select is-fullwidth">
+
+                                                    <select id="divisionGrupo" name="divisionGrupo">
+
+                                                        <option value="CS">CS</option>
+
+                                                        <option value="IND">IND</option>
+
+                                                    </select>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
                                 </div>
 
                                 <div class="field">
@@ -1454,10 +1480,6 @@ export function renderFormRemitoGrupos() {
 
             }
 
-
-
-
-
             if (selectEmpresaDestino.value === 'ABASTO') {
 
                 email.value = 'administracion@abastonqn.com.ar';
@@ -1473,13 +1495,13 @@ export function renderFormRemitoGrupos() {
                 if (selectEmpresaDestino.value === 'GO LOGISTISCA') {
 
                     email.value = 'claudiogabriel.bonaparte@nov.com;Gilberto.Solis@nov.com'
-
+                    divisionFieldGrupo.classList.remove('is-hidden');
                     dominioFieldGrupo.classList.remove('is-hidden');
 
                 } else {
 
                     email.value = 'lMendoza@tetratec.com;dgimenez@onetetra.com'
-
+                    divisionFieldGrupo.classList.add('is-hidden');
                     dominioFieldGrupo.classList.add('is-hidden');
 
                 }
