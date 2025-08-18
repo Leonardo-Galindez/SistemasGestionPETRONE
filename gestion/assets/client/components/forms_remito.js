@@ -1010,6 +1010,31 @@ export function renderFormRemitoGrupos() {
 
                                             <div class="field">
 
+                                                <label class="label" for="fecha">Fecha Remito</label>
+
+                                                <div class="control">
+
+                                                    <input class="input" type="date" id="fechaRemitoGrupo" name="fechaRemitoGrupo">
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+
+                                    </div>
+
+                                </div>
+
+                                <div class="field">
+
+                                    <div class="columns">
+
+                                    <div class="column">
+
+                                            <div class="field">
+
                                                 <label class="label" for="nro_factura">Nro Factura</label>
 
                                                 <div class="control">
@@ -1021,14 +1046,6 @@ export function renderFormRemitoGrupos() {
                                             </div>
 
                                         </div>
-
-                                    </div>
-
-                                </div>
-
-                                <div class="field">
-
-                                    <div class="columns">
 
                                     <div class="column">
 

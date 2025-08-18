@@ -582,6 +582,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const nroRemitoGrupo = document.getElementById('nro_remitoGrupo').value;
 
+            const fechaRemitoGrupo = document.getElementById('fechaRemitoGrupo').value;
+
             const nroFacturaGrupo = document.getElementById('nro_facturaGrupo').value;
 
             const fechaPagoGrupo = document.getElementById('fechaPagoGrupo').value;
@@ -635,6 +637,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 emailGrupo,
 
                 nroRemitoGrupo,
+
+                fechaRemitoGrupo,
 
                 nroFacturaGrupo,
 
@@ -1100,8 +1104,6 @@ async function enviarRemitoGrupo(remito) {
 
     const formData = new FormData();
 
-
-
     formData.append('empresa', remito.empresaGrupo);
 
     formData.append('empresa_destino', remito.empresa_destinoGrupo);
@@ -1131,6 +1133,8 @@ async function enviarRemitoGrupo(remito) {
     formData.append('fechaVencimiento', remito.fechaVencimientoGrupo);
 
     formData.append('nro_remito', remito.nroRemitoGrupo);
+
+    formData.append('fechaRemito', remito.fechaRemitoGrupo);
 
     formData.append('nro_factura', remito.nroFacturaGrupo);
 
