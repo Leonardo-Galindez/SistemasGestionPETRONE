@@ -70,13 +70,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
             document.body.appendChild(loader);
 
-
-
             try {
+                const nroRemito = document.getElementById('nro_remito').value;
+                const empresa = document.getElementById('empresa').value;
 
-                await enviarRemito(); // Esperar a que se complete el envío
+                fetch(`../../server/backend/modules/fetch_remito.php?nroRemito=${encodeURIComponent(nroRemito)}&empresa=${encodeURIComponent(empresa)}`)
+                    .then(res => res.json())
+                    .then(async data => {
+                        if (data.success) {
+                            if (data.exists) {
+                                alert("El número de remito ya existe en la base de datos.");
+                            } else {
+                                await enviarRemito(); // Esperar a que se complete el envío
 
-                location.reload();
+                                location.reload();
+                            }
+                        } else {
+                            console.error("Error:", data.error);
+                        }
+                    })
+                    .catch(err => console.error("Error en la petición:", err));
 
             } catch (error) {
 
@@ -615,78 +628,94 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
             if (!nroRemitoGrupo) {
-
                 alert("Debes ingresar un número de remito");
-
                 return;
+            } else {
+                try {
 
+                    fetch(`../../server/backend/modules/fetch_remito.php?nroRemito=${encodeURIComponent(nroRemitoGrupo)}&empresa=${encodeURIComponent(empresaGrupo)}`)
+                        .then(res => res.json())
+                        .then(async data => {
+                            if (data.success) {
+                                if (data.exists) {
+                                    alert("El número de remito ya existe en la base de datos.");
+                                } else {
+                                    const remito = {
+
+                                        empresaGrupo,
+
+                                        empresa_destinoGrupo,
+
+                                        nuevaEmpresaDestinoGrupo,
+
+                                        emailGrupo,
+
+                                        nroRemitoGrupo,
+
+                                        fechaRemitoGrupo,
+
+                                        nroFacturaGrupo,
+
+                                        fechaPagoGrupo,
+
+                                        fechaFacturadoGrupo,
+
+                                        fechaVencimientoGrupo,
+
+                                        fechaGrupo,
+
+                                        dominioGrupo,
+
+                                        divisionGrupo,
+
+                                        valorTotalGrupo,
+
+                                        descripcionGrupo,
+
+                                        detalleGrupo,
+
+                                        debeGrupo,
+
+                                        estadoGrupo,
+
+                                        archivos: [...selectedFilesGrupos],
+
+                                        facturas: [...selectedFilesFactGrupos],
+
+                                        incluirArchivosGrupo,
+
+                                        incluirFacturasGrupo
+
+
+
+                                    };
+
+                                    remitosGrupo.push(remito);
+
+                                    selectedFilesGrupos = [];
+
+                                    selectedFilesFactGrupos = [];
+
+                                    renderFileListGrupos(); // Vacía la lista en pantalla también
+
+                                    renderFileListFacturasGrupos();
+
+                                    mostrarRemitosEnLista();
+                                }
+                            } else {
+                                console.error("Error:", data.error);
+                            }
+                        })
+                        .catch(err => console.error("Error en la petición:", err));
+
+                } catch (error) {
+
+                    console.error("Error al guardar el remito:", error);
+
+                }
             }
 
 
-
-
-
-            const remito = {
-
-                empresaGrupo,
-
-                empresa_destinoGrupo,
-
-                nuevaEmpresaDestinoGrupo,
-
-                emailGrupo,
-
-                nroRemitoGrupo,
-
-                fechaRemitoGrupo,
-
-                nroFacturaGrupo,
-
-                fechaPagoGrupo,
-
-                fechaFacturadoGrupo,
-
-                fechaVencimientoGrupo,
-
-                fechaGrupo,
-
-                dominioGrupo,
-
-                divisionGrupo,
-
-                valorTotalGrupo,
-
-                descripcionGrupo,
-
-                detalleGrupo,
-
-                debeGrupo,
-
-                estadoGrupo,
-
-                archivos: [...selectedFilesGrupos],
-
-                facturas: [...selectedFilesFactGrupos],
-
-                incluirArchivosGrupo,
-
-                incluirFacturasGrupo
-
-
-
-            };
-
-            remitosGrupo.push(remito);
-
-            selectedFilesGrupos = [];
-
-            selectedFilesFactGrupos = [];
-
-            renderFileListGrupos(); // Vacía la lista en pantalla también
-
-            renderFileListFacturasGrupos();
-
-            mostrarRemitosEnLista();
 
         });
 
