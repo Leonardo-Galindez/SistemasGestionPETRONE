@@ -1,70 +1,139 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Planillas Excel</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@12.1.1/dist/handsontable.full.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-
-  <script src="https://cdn.jsdelivr.net/npm/handsontable@12.1.1/dist/handsontable.full.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/hyperformula@1.5.0/dist/hyperformula.umd.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-
-
-  <link rel="stylesheet" href="../styles/excel-empresa.css">
-  <script type="module" src="../components/excel.js"></script>
-</head>
-
-<body>
-  <div class="toolbar">
-    <!-- Top Menu -->
-    <div class="top-menu">
-      <a href="#"><i class="fas fa-home"></i> Inicio</a>
-      <a href="#"><i class="fas fa-file-export"></i> Exportar</a>
-      <a href="#"><i class="fas fa-file-import"></i> Importar</a>
-      <a href="#" id="btn-abrir">
-        <i class="fas fa-file-import"></i> Abrir
-      </a>
-      <div id="dropdown-empresas" class="dropdown-menu" style="display: none;">
-        <select id="empresa-select">
-          <option value="">Seleccione una empresa</option>
-        </select>
-      </div>
-
-      <a href="#" id="btn-guardar"><i class="fas fa-save"></i> Guardar</a>
-    </div>
-
-    <!-- Fuente Section -->
-    <div class="section fuente">
-      <div class="row">
-        <select>
-          <option>Calibri</option>
-          <option>Arial</option>
-          <option>Times New Roman</option>
-        </select>
-        <input type="number" min="8" max="72" placeholder="11">
-      </div>
-      <div class="row">
-        <div class="color-picker">
-          <label for="text-color"><i class="fas fa-font"></i></label>
-          <input type="color" id="text-color">
-        </div>
-        <div class="color-picker">
-          <label for="fill-color"><i class="fas fa-fill-drip"></i></label>
-          <input type="color" id="fill-color">
-        </div>
-
-      </div>
-      <div class="formulas">
-        <input type="text" placeholder="ƒ(x)">
-      </div>
-    </div>
-  </div>
-  <div id="handsontable">
-
-  </div>
-</body>
-
+<!DOCTYPE html>
+
+<html lang="en">
+
+
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Planillas Excel</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@12.1.1/dist/handsontable.full.min.css" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+
+
+  <script src="https://cdn.jsdelivr.net/npm/handsontable@12.1.1/dist/handsontable.full.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/hyperformula@1.5.0/dist/hyperformula.umd.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+
+
+
+
+
+  <link rel="stylesheet" href="../styles/excel-empresa.css">
+
+  <script type="module" src="../components/excel.js"></script>
+
+</head>
+
+
+
+<body>
+
+  <div class="toolbar">
+
+    <!-- Top Menu -->
+
+    <div class="top-menu">
+
+      <a href="#"><i class="fas fa-home"></i> Inicio</a>
+
+      <a href="#"><i class="fas fa-file-export"></i> Exportar</a>
+
+      <a href="#"><i class="fas fa-file-import"></i> Importar</a>
+
+      <a href="#" id="btn-abrir">
+
+        <i class="fas fa-file-import"></i> Abrir
+
+      </a>
+
+      <div id="dropdown-empresas" class="dropdown-menu" style="display: none;">
+
+        <select id="empresa-select">
+
+          <option value="">Seleccione una empresa</option>
+
+        </select>
+
+      </div>
+
+
+
+      <a href="#" id="btn-guardar"><i class="fas fa-save"></i> Guardar</a>
+
+    </div>
+
+
+
+    <!-- Fuente Section -->
+
+    <div class="section fuente">
+
+      <div class="row">
+
+        <select>
+
+          <option>Calibri</option>
+
+          <option>Arial</option>
+
+          <option>Times New Roman</option>
+
+        </select>
+
+        <input type="number" min="8" max="72" placeholder="11">
+
+      </div>
+
+      <div class="row">
+
+        <div class="color-picker">
+
+          <label for="text-color"><i class="fas fa-font"></i></label>
+
+          <input type="color" id="text-color">
+
+        </div>
+
+        <div class="color-picker">
+
+          <label for="fill-color"><i class="fas fa-fill-drip"></i></label>
+
+          <input type="color" id="fill-color">
+
+        </div>
+
+
+
+      </div>
+
+      <div class="formulas">
+
+        <input type="text" placeholder="ƒ(x)">
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div id="handsontable">
+
+
+
+  </div>
+
+</body>
+
+
+
 </html>
