@@ -74,6 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const nroRemito = document.getElementById('nro_remito').value;
                 const empresa = document.getElementById('empresa').value;
 
+                console.log(nroRemito, empresa);
+
                 fetch(`../../server/backend/modules/fetch_remito.php?nroRemito=${encodeURIComponent(nroRemito)}&empresa=${encodeURIComponent(empresa)}`)
                     .then(res => res.json())
                     .then(async data => {

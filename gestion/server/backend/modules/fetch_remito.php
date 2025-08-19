@@ -20,7 +20,11 @@ try {
               LIMIT 1";
 
     $stmt = $base_de_datos->prepare($query);
-    $stmt->execute([':nroRemito' => $nroRemito]);
+    $stmt->execute([
+        ':nroRemito' => $nroRemito,
+        ':empresa' => $empresa
+    ]);
+
 
     $remito = $stmt->fetch(PDO::FETCH_ASSOC);
 
