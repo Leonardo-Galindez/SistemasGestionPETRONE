@@ -194,25 +194,13 @@ try {
 
             $params[':facturas'] = $facturasParaGuardar;
 
-        } else {
-
-            $setParts[] = "incluirFacturas = 0";
-
         }
 
-
-
-        $setParts[] = "incluirArchivos = 0";
-
         $setParts[] = "fechaCreacion = NOW()";
-
-
 
         $setClause = implode(', ', $setParts);
 
         $params[':idRemito'] = $idRemito;
-
-
 
         $stmt = $base_de_datos->prepare("UPDATE remito SET $setClause WHERE id = :idRemito");
 
