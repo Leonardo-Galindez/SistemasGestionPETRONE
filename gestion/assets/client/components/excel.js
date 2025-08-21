@@ -1443,243 +1443,172 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     exportButton.addEventListener('click', async () => {
+        const raw = hot.getData(); // incluye cabecera en [0]
+        if (!raw || raw.length === 0) return;
 
-        const data = hot.getData(); // Obtener datos desde Handsontable
+        // --- helpers ---
+        const norm = v => (v ?? '').toString().trim().toLowerCase();
+        const isNullish = v => v === null || v === undefined || norm(v) === '';
+        const isEmptyRow = row => !row || row.every(isNullish);
+        const isZeroDate = v => typeof v === 'string' && /^0{1,2}\/0{1,2}\/0{2,4}$/.test(v.trim());
+        const parseEsNumber = s => {
+            const clean = String(s).replace(/[^0-9,.\-]/g, '').replace(/\./g, '').replace(',', '.');
+            const n = Number(clean);
+            return Number.isFinite(n) ? n : null;
+        };
+        const isEsNumeric = s => {
+            if (typeof s === 'number') return Number.isFinite(s);
+            if (typeof s === 'string') return parseEsNumber(s) !== null;
+            return false;
+        };
 
-        const trimmedData = data.slice(0, -1); // sin la última fila
+        // --- cabecera e índices de columnas por nombre (tolerante a espacios/caso) ---
+        const headers = raw[0].map(h => (h ?? '').toString());
+        const findCol = name => headers.findIndex(h => norm(h) === norm(name)); // exacto por nombre
+
+        const idxVehiculo = findCol('vehiculo');
+        const idxCosto = findCol('costo');
+        const idxContrato = findCol('contrato');
+
+        // --- determinar columna de TOTAL según empresa (la usaremos para filtrar y para sumar) ---
+        let totalColName = 'total';
+        if (empresaSelect.value === 'EXPRO') totalColName = 'costo_total';
+        else if (empresaSelect.value === 'SULLAIR') totalColName = 'costo';
+        else if (empresaSelect.value === 'TETRA') totalColName = 'valor';
+        else if (empresaSelect.value === 'SECCO') totalColName = 'Total';
+
+        const totalColIndex0 = findCol(totalColName); // 0-based (puede ser -1 si no existe)
+
+        // --- limpiar filas: sin vacías, sin "TOTAL", sin $ en costo (SULLAIR) y sin residuales de solo número ---
+        const body = raw.slice(1).filter(row => {
+            if (isEmptyRow(row)) return false;
+
+            // descarta filas con la palabra TOTAL en cualquier celda
+            if (row.some(c => typeof c === 'string' && /total/i.test(c))) return false;
+
+            // regla SULLAIR histórica: fila de sumatoria con $ en Costo
+            if (idxCosto >= 0) {
+                const costoRaw = row[idxCosto];
+                if (typeof costoRaw === 'string' && /^\s*\$/.test(costoRaw)) return false;
+            }
+
+            // NUEVO: descarta fila residual que trae SOLO el número en la columna de total/costo
+            if (totalColIndex0 >= 0) {
+                const val = row[totalColIndex0];
+                if (isEsNumeric(val)) {
+                    // ¿las otras celdas están vacías o son placeholders?
+                    const others = row.filter((_, i) => i !== totalColIndex0);
+                    const othersAreEmptyish = others.every(c => {
+                        const t = norm(c);
+                        // placeholders típicos: "", 0, "0", "00/00/0000", "undefined"
+                        if (isNullish(c) || isZeroDate(c) || t === 'undefined' || t === '0') return true;
+                        // si hay texto "real" como descripciones/códigos, NO es residual
+                        return false;
+                    });
+                    if (othersAreEmptyish) return false;
+                }
+            }
+
+            return true; // fila válida
+        });
+
+        // reconstruir datos a exportar
+        const data = [headers, ...body];
 
         const wb = new ExcelJS.Workbook();
+        const ws = wb.addWorksheet('Hoja1');
 
-        const ws = wb.addWorksheet("Hoja1");
+        // agregar filas
+        ws.addRows(data);
 
-
-
-        // Agregar las filas (cabecera incluida)
-
-        ws.addRows(trimmedData);
-
-
-
-        // Estilizar cabecera (primera fila)
-
+        // estilo cabecera
         const headerRow = ws.getRow(1);
-
-        headerRow.eachCell((cell) => {
-
-            cell.fill = {
-
-                type: 'pattern',
-
-                pattern: 'solid',
-
-                fgColor: { argb: 'A9A9A9' }
-
-            };
-
-            cell.font = {
-
-                bold: true,
-
-                color: { argb: '000000' }
-
-            };
-
-            cell.alignment = {
-
-                horizontal: 'center',
-
-                vertical: 'middle'
-
-            };
-
+        headerRow.eachCell(cell => {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'A9A9A9' } };
+            cell.font = { bold: true, color: { argb: '000000' } };
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
         });
-
         headerRow.commit();
 
+        // --- conversión NUMÉRICA + formato (solo columna costo para SULLAIR y GO si corresponde) ---
+        let colToNumberIndex = null; // índice 1-based en ExcelJS
+        if (empresaSelect.value === 'SULLAIR' && idxCosto >= 0) {
+            colToNumberIndex = idxCosto + 1;
+        } else if (empresaSelect.value === 'GO LOGISTISCA') {
+            // si desea forzar en GO, use el nombre 'Total' u otro encabezado
+            colToNumberIndex = (findCol('Total') + 1) || 6;
+        }
 
+        const lastDataRow = ws.lastRow.number;
 
-        // Conversión de columnas específicas a número
-
-        for (let R = 1; R < trimmedData.length; ++R) { // empieza desde 1 porque 0 es cabecera
-
-            let colIndex = null;
-
-
-
-            if (empresaSelect.value === 'GO LOGISTISCA') {
-
-                colIndex = 6;
-
-            } else if (empresaSelect.value === 'SULLAIR') {
-
-                colIndex = 16;
-
-            }
-
-
-
-            if (colIndex) {
-
-                const cell = ws.getCell(R + 1, colIndex); // R+1 por cabecera en fila 1
-
-                const value = cell.value;
-
-                if (typeof value === 'string') {
-
-                    const num = parseFloat(value.replace(/\./g, '').replace(',', '.'));
-
-                    if (!isNaN(num)) {
-
-                        cell.value = num;
-
-                        cell.numFmt = '#,##0.00';
-
-                        cell.alignment = { horizontal: 'right' };
-
-                    }
-
+        if (colToNumberIndex) {
+            for (let r = 2; r <= lastDataRow; r++) {
+                const cell = ws.getCell(r, colToNumberIndex);
+                const v = cell.value;
+                if (typeof v === 'string') {
+                    const n = parseEsNumber(v);
+                    if (n !== null) cell.value = n;
                 }
-
-            }
-
-        }
-
-
-
-        // === NUEVO: Detectar columna de valores y aplicar formato contable ===
-
-        const lastRowNumber = ws.lastRow.number;
-
-        const headers = trimmedData[0];
-
-
-
-        let totalColName = "total";
-
-        if (empresaSelect.value === 'EXPRO') {
-
-            totalColName = "costo_total";
-
-        } else if (empresaSelect.value === 'SULLAIR') {
-
-            totalColName = "costo";
-
-        } else if (empresaSelect.value === 'TETRA') {
-
-            totalColName = "valor";
-
-        } else if (empresaSelect.value === 'SECCO') {
-
-            totalColName = "Total";
-
-        }
-
-
-
-        const totalColIndex = headers.indexOf(totalColName) + 1;
-
-
-
-        if (totalColIndex > 0) {
-
-            const colLetter = ws.getColumn(totalColIndex).letter;
-
-
-
-            // Aplicar formato contable a cada celda de la columna
-
-            for (let row = 2; row <= lastRowNumber; row++) {
-
-                const cell = ws.getCell(`${colLetter}${row}`);
-
                 if (typeof cell.value === 'number') {
-
                     cell.numFmt = '"$"#,##0.00;[Red]\-"$"#,##0.00';
-
                     cell.alignment = { horizontal: 'right' };
-
                 }
-
             }
-
-
-
-            // Celda de suma
-
-            const sumCell = ws.getCell(`${colLetter}${lastRowNumber + 1}`);
-
-            sumCell.value = { formula: `SUM(${colLetter}2:${colLetter}${lastRowNumber})` };
-
-            sumCell.font = { bold: true, color: { argb: '000000' } };
-
-            sumCell.alignment = { horizontal: 'right' };
-
-            sumCell.numFmt = '"$"#,##0.00;[Red]\-"$"#,##0.00';
-
-
-
-            // (Opcional) Celda "TOTAL" a la izquierda
-
-            const labelCell = ws.getCell(`${String.fromCharCode(colLetter.charCodeAt(0) - 1)}${lastRowNumber + 1}`);
-
-            labelCell.value = "TOTAL";
-
-            labelCell.font = { bold: true };
-
-            labelCell.alignment = { horizontal: 'right' };
-
         }
 
+        // "contrato" en General: no aplicar formato especial (no se toca idxContrato)
 
+        // --- SUMA del TOTAL en la columna objetivo ---
+        if (totalColIndex0 >= 0) {
+            const totalCol = totalColIndex0 + 1;        // 1-based
+            const colLetter = ws.getColumn(totalCol).letter;
 
+            // Formatear/convertir por si aún hay strings en esa columna
+            for (let r = 2; r <= lastDataRow; r++) {
+                const c = ws.getCell(r, totalCol);
+                if (typeof c.value === 'string') {
+                    const n = parseEsNumber(c.value);
+                    if (n !== null) c.value = n;
+                }
+                if (typeof c.value === 'number') {
+                    c.numFmt = '"$"#,##0.00;[Red]\-"$"#,##0.00';
+                    c.alignment = { horizontal: 'right' };
+                }
+            }
 
+            // Fila TOTAL (única)
+            const totalRow = lastDataRow + 1;
+            if (totalCol > 1) {
+                const labelCell = ws.getCell(totalRow, totalCol - 1);
+                labelCell.value = 'TOTAL';
+                labelCell.font = { bold: true };
+                labelCell.alignment = { horizontal: 'right' };
+            }
+            const sumCell = ws.getCell(totalRow, totalCol);
+            sumCell.value = { formula: `SUM(${colLetter}2:${colLetter}${lastDataRow})` };
+            sumCell.font = { bold: true, color: { argb: '000000' } };
+            sumCell.alignment = { horizontal: 'right' };
+            sumCell.numFmt = '"$"#,##0.00;[Red]\-"$"#,##0.00';
+        }
 
-        // Ajustar ancho de columnas según contenido (después de formatear)
-
-        ws.columns.forEach(column => {
-
-            let maxLength = 10;
-
-            column.eachCell({ includeEmpty: true }, cell => {
-
-                const text = cell.value ? cell.value.toString() : '';
-
-                maxLength = Math.max(maxLength, text.length + 2);
-
+        // --- ancho de columnas ---
+        ws.columns.forEach(col => {
+            let maxLen = 10;
+            col.eachCell({ includeEmpty: true }, cell => {
+                const t = (cell.value ?? '').toString();
+                maxLen = Math.max(maxLen, t.length + 2);
             });
-
-            column.width = maxLength;
-
+            col.width = maxLen;
         });
 
-
-
-        // Exportar como archivo
-
+        // --- exportar ---
         const buffer = await wb.xlsx.writeBuffer();
-
-        const blob = new Blob([buffer], {
-
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-
-        });
-
-
-
-        const link = document.createElement("a");
-
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-
-        link.download = "resumen.xlsx";
-
+        link.download = 'resumen.xlsx';
         link.click();
-
     });
-
-
-
-
-
 
 
     empresaSelect.addEventListener('change', async () => {
@@ -1944,7 +1873,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         // Índices de las columnas que no se pueden editar
 
-                        const nonEditableColumns = ['fecha', 'nroRemito', 'remitoGo', 'total', 'remito', 'division','dominio'];
+                        const nonEditableColumns = ['fecha', 'nroRemito', 'remitoGo', 'total', 'remito', 'division', 'dominio'];
 
                         const nonEditableIndexes = columnNames.map((name, index) =>
 
