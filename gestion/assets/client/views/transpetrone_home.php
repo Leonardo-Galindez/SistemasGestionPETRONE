@@ -63,9 +63,6 @@ $usuario = $_SESSION['usuario'];
     <div class="table"></div>
 
 
-
-    <script type="module" src="../controllers/controller_render.js"></script>
-
     <script type="module" src="../controllers/controller_render_transpetrone.js"></script>
 
     <script type="module" src="../controllers/controller_forms_remitos.js"></script>

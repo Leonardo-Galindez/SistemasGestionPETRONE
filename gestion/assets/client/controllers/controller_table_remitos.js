@@ -11,7 +11,6 @@ let currentPage = 1;
 const remitosPorPagina = 250;
 
 
-
 export async function fetchAndRenderRemitos(page = 1) {
 
     try {
@@ -112,10 +111,6 @@ export async function fetchAndRenderRemitos(page = 1) {
 
 
 
-
-
-            // Crear columnas (td) para cada dato
-
             row.innerHTML = `
 
                 <td>${remito.id}</td>
@@ -123,20 +118,26 @@ export async function fetchAndRenderRemitos(page = 1) {
                 <td class="nroRemito-column">${remito.nroRemito}</td>
 
                 <td>${remito.nroFactura}</td>
-
-                <td>${remito.empresa}</td>
+                
+                ${user === "administrador" ? `<td>${remito.empresa}</td>` : ""}
 
                 <td>${remito.empresa_destino}</td>
 
                 <td>${remito.valor_total}</td>
 
-                <td class="email-column">${remito.email}</td>
+                ${(user !== "transpetrone" && user !== "nemer") ?
+                    `<td class="email-column">${remito.email}</td>`
+                    : ""}
 
                 <td>${remito.estado}</td>
 
-                <td>${remito.debe}</td>
+                ${(user === "administrador" || user === "nemer") ? `<td>${remito.debe}</td>` : ""}
 
-                <td>${remito.fechaEnvio}</td>
+                ${user === "abasto" ? `<td>${remito.dominio}</td>` : ""}
+
+                ${user === "administrador" ? `<td>${remito.fechaEnvio}</td>` : ""}
+
+                ${user !== "administrador" ? `<td>${remito.fechaRemito}</td>` : ""}
 
                 <td>${remito.fechaFacturado}</td>
 
@@ -651,117 +652,6 @@ async function abrirFormRemitoUpdateGrupo() {
 }
 
 
-
-
-
-/*async function abrirFormRemitoUpdateGrupo() {
-
-    modalRemitoUpdateGrupo.classList.add('is-active');
-
-    const remitosString = remitosSeleccionados.join(';');
-
-    document.getElementById('nro_remitoUpdateGrupo').value = remitosString;
-
-    const select = document.getElementById('nro_remitoAdjuntoGrupo');
-
-    select.innerHTML = ''; // Limpiar opciones previas
-
-    const modalBackground = modalRemitoUpdateGrupo?.querySelector('.modal-background');
-
-    const cancelarSeleccionarBtn = document.getElementById('cancelarRemitoUpdateGrupo');
-
-    const cerrarUpdateGrupo = document.getElementById('cerrarUpdateGrupo');
-
-    const actualizarRemitoGrupo = document.getElementById('actualizarRemitoGrupo');
-
-
-
-    // Cerrar el modal al hacer clic en el botón de cerrar
-
-    if (cerrarUpdateGrupo) {
-
-        cerrarUpdateGrupo.addEventListener('click', () => {
-
-            modalRemitoUpdateGrupo.classList.remove('is-active');
-
-        });
-
-    }
-
-
-
-    // Cerrar el modal al hacer clic en el fondo
-
-    if (modalBackground) {
-
-        modalBackground.addEventListener('click', () => {
-
-            modalRemitoUpdateGrupo.classList.remove('is-active');
-
-        });
-
-    }
-
-
-
-    // Cancelar filtros
-
-    if (actualizarRemitoGrupo) {
-
-        actualizarRemitoGrupo.addEventListener('click', async () => {
-
-            const confirmar = confirm("¿Estás seguro de que querés actualizar los remitos?");
-
-            if (confirmar) {
-
-                const form = document.getElementById('remitoFormUpdateGrupo');
-
-                const formData = new FormData(form);
-
-                await updateGrupoRemitos(formData);
-
-            }
-
-        });
-
-    }
-
-
-
-    // Cancelar filtros
-
-    if (cancelarSeleccionarBtn) {
-
-        cancelarSeleccionarBtn.addEventListener('click', () => {
-
-            modalRemitoUpdateGrupo.classList.remove('is-active');
-
-        });
-
-    }
-
-
-
-    remitosSeleccionados.forEach(remito => {
-
-        const option = document.createElement('option');
-
-        option.value = remito;
-
-        option.textContent = remito;
-
-        select.appendChild(option);
-
-    });
-
-
-
-    renderFacturasListGrupo();
-
-}*/
-
-
-
 export async function fetchAndRenderRemitosFacturados(page = 1) {
 
     try {
@@ -874,13 +764,9 @@ export async function fetchAndRenderRemitosFacturados(page = 1) {
 
                 <td>${remito.nroFactura}</td>
 
-                <td>${remito.empresa}</td>
-
                 <td>${remito.empresa_destino}</td>
 
                 <td>${remito.valor_total}</td>
-
-                <td class="email-column">${remito.email}</td>
 
                 <td>${remito.estado}</td>
 
@@ -1193,11 +1079,6 @@ export async function fetchAndRenderRemitosFacturados(page = 1) {
 }
 
 
-
-
-
-
-
 export async function fetchAndRenderRemitosNemer(page = 1) {
 
     try {
@@ -1306,19 +1187,15 @@ export async function fetchAndRenderRemitosNemer(page = 1) {
 
                 <td>${remito.nroFactura}</td>
 
-                <td>${remito.empresa}</td>
-
                 <td>${remito.empresa_destino}</td>
 
                 <td>${remito.valor_total}</td>
-
-                <td class="email-column">${remito.email}</td>
 
                 <td>${remito.estado}</td>
 
                 <td>${remito.debe}</td>
 
-                <td>${remito.fechaEnvio}</td>
+                <td>${remito.fechaRemito}</td>
 
                 <td>${remito.fechaFacturado}</td>
 
