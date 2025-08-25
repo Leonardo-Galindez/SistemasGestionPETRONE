@@ -55,6 +55,11 @@ try {
     $division = $_POST['division'] ?? null;
 
 
+    $dominio = strtolower($dominio);
+
+    if ($dominio === 'chupa') {
+        $email = 'Jose.Gonzalez2@nov.com';
+    }
 
     // Manejar archivos subidos
 
