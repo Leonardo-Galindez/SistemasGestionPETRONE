@@ -16,7 +16,6 @@ import { renderTotal } from '../components/total.js';
 
 import { renderBtnFiltros, renderBtnFiltrosPendientes, renderBtnFiltrosDeudas } from '../components/btn_filtros.js';
 
-
 import { renderBtnActualizar } from '../components/btn_actualizar.js';
 
 import { renderBtnSeleccionarRemitos } from '../components/btn_seleccionarRemitos.js';
@@ -73,14 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     renderBtnPagado();
 
-    renderBtnAddGrupoRemito();
-
     renderFormRemitoGrupos();
 
     renderFormRemitoUpdateGrupo();
 
     renderBtnUpdateGrupoRemito();
 
-
+    renderBtnAddGrupoRemito();
 
 });

@@ -12,6 +12,12 @@ try {
             case 'transpetrone':
                 $empresaFiltro = " AND empresa = 'TRANSPETRONE'";
                 break;
+            case 'nemer':
+                $empresaFiltro = " AND empresa = 'NEMER'";
+                break;
+            case 'abasto':
+                $empresaFiltro = " AND empresa = 'ABASTO'";
+                break;
             default:
                 $empresaFiltro = " AND empresa = 'TPOIL'";
                 break;

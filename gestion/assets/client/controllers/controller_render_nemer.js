@@ -1,17 +1,22 @@
-import { renderBtnRemitosFacturados } from '../components/btn_remitos_facturados.js';
+import { renderBtnPagado } from '../components/btn_pagado.js';
 
-import { renderFormRemitoGrupos } from '../components/forms_remito.js';
+import { renderBtnUpdateGrupoRemito } from '../components/btn_actualizarGrupo.js';
+
+import { renderBtnAddGrupoRemito } from '../components/btn_add_grupos_remitos.js';
 
 import { renderTableRemitosNemer } from '../components/table_remitos.js';
+
+import { renderFormRemitoGrupos, renderFormRemitoUpdateGrupo } from '../components/forms_remito.js';
 
 import { renderHeader } from '../components/header.js';
 
 import { renderBtnAddRemito } from '../components/btn_add_remito.js';
 
+import { renderBtnRemitosFacturados } from '../components/btn_remitos_facturados.js';
+
 import { renderTotal } from '../components/total.js';
 
 import { renderBtnFiltros, renderBtnFiltrosPendientes, renderBtnFiltrosDeudas } from '../components/btn_filtros.js';
-
 
 import { renderBtnActualizar } from '../components/btn_actualizar.js';
 
@@ -26,6 +31,7 @@ import { renderTableRemitoPendientes, renderTableDeudas } from '../components/ta
 import { renderFormRemito, renderFormRemitoUpdate } from '../components/forms_remito.js';
 
 import { renderFormFiltros, renderFormFiltrosDeudas, renderFormFiltrosPendientes } from '../components/forms_filtros.js';
+
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -56,6 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     renderBtnActualizar();
 
+    renderBtnRemitosFacturados();
+
     renderBtnSeleccionarRemitos();
 
     renderBtnEnviarCorreo();
@@ -66,11 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     renderTableDeudas();
 
-    renderBtnRemitosFacturados();
+    renderBtnPagado();
 
     renderFormRemitoGrupos();
 
-
+    renderFormRemitoUpdateGrupo();
 
 });
-
