@@ -76,6 +76,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                     break;
 
+                case 'tpoil':
+
+                    header("Location: ../../client/views/movil_home.php");
+
+                    break;
+
                 case 'transpetrone':
 
                     header("Location: ../../client/views/transpetrone_home.php");
