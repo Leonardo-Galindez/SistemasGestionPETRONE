@@ -45,29 +45,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     if (guardarRemito) {
-
         guardarRemito.addEventListener('click', async (event) => {
+            event.preventDefault();
 
-            event.preventDefault(); // Prevenir comportamiento por defecto
-
-
-
-            if (guardarRemito.disabled) return; // Si ya está deshabilitado, no hacer nada
-
-
-
-            guardarRemito.disabled = true; // Deshabilitar el botón
-
-
+            if (guardarRemito.disabled) return;
+            guardarRemito.disabled = true;
 
             // Crear y mostrar loader
-
             const loader = document.createElement('div');
-
             loader.id = 'loader';
-
             loader.innerHTML = '<div class="spinner"></div>';
-
             document.body.appendChild(loader);
 
             try {
@@ -76,46 +63,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 console.log(nroRemito, empresa);
 
-                fetch(`../../server/backend/modules/fetch_remito.php?nroRemito=${encodeURIComponent(nroRemito)}&empresa=${encodeURIComponent(empresa)}`)
-                    .then(res => res.json())
-                    .then(async data => {
-                        if (data.success) {
-                            if (data.exists) {
-                                alert("El número de remito ya existe en la base de datos.");
-                            } else {
-                                await enviarRemito(); // Esperar a que se complete el envío
+                const res = await fetch(`../../server/backend/modules/fetch_remito.php?nroRemito=${encodeURIComponent(nroRemito)}&empresa=${encodeURIComponent(empresa)}`);
+                const data = await res.json();
 
-                                location.reload();
-                            }
-                        } else {
-                            console.error("Error:", data.error);
-                        }
-                    })
-                    .catch(err => console.error("Error en la petición:", err));
-
-            } catch (error) {
-
-                console.error("Error al guardar el remito:", error);
-
-            } finally {
-
-                guardarRemito.disabled = false; // Rehabilitar el botón
-
-
-
-                // Eliminar loader
-
-                if (loader) {
-
-                    loader.remove();
-
+                if (data.success) {
+                    if (data.exists) {
+                        alert("El número de remito ya existe en la base de datos.");
+                    } else {
+                        await enviarRemito();
+                        location.reload();
+                    }
+                } else {
+                    console.error("Error:", data.error);
                 }
 
+            } catch (error) {
+                console.error("Error al guardar el remito:", error);
+            } finally {
+                guardarRemito.disabled = false;
+                if (loader) loader.remove();
             }
-
         });
-
     }
+
 
 
 
